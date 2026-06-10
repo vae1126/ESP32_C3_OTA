@@ -1,0 +1,22 @@
+menu "LED Control"
+    config LED_PWM_R_GPIO
+        int "PWM Red GPIO"
+        range 0 39
+        default 3
+    config LED_PWM_G_GPIO
+        int "PWM Green GPIO"
+        range 0 39
+        default 4
+    config LED_PWM_B_GPIO
+        int "PWM Blue GPIO"
+        range 0 39
+        default 5
+    config LED_WS2812_GPIO
+        int "WS2812 GPIO"
+        range 0 39
+        default 8
+    config LED_WS2812_NUM
+        int "WS2812 LED count"
+        range 1 256
+        default 16
+endmenu

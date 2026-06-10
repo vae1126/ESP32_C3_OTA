@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"C:/esp/v6.0.1/esp-idf/components\" -maxdepth 1 -type d -iname \"*json*\" -o -iname \"*cjson*\" 2>/dev/null)",
+      "Read(//c/esp/v6.0.1/esp-idf/components/**)",
+      "Bash(find \"C:/esp/v6.0.1/esp-idf/components\" -maxdepth 1 -type d 2>/dev/null | grep -iE \"json|nvs_|wifi|mqtt\")",
+      "Bash(powershell.exe -NoProfile -Command \"& 'C:\\\\esp\\\\v6.0.1\\\\esp-idf\\\\export.ps1'; idf.py set-target esp32c3\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"& 'C:\\\\esp\\\\v6.0.1\\\\esp-idf\\\\export.ps1' 2>&1; idf.py --version 2>&1\")"
+    ]
+  }
+}

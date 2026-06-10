@@ -1,0 +1,3 @@
+config MQTT_BROKER_URL
+    string "MQTT Broker URL"
+    default "mqtt://47.121.26.212:1883"

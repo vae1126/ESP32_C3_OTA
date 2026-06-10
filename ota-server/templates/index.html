@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}固件版本 — OTA 固件管理{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center my-4">
+    <h3>📦 固件版本管理</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">＋ 上传新固件</button>
+</div>
+
+{% if firmwares %}
+<div class="row">
+{% for fw in firmwares %}
+<div class="col-md-6 col-lg-4">
+    <div class="card {% if fw.is_latest %}border-success{% endif %}">
+        <div class="card-body">
+            <h5 class="card-title">
+                <span class="version-badge">v{{ fw.version }}</span>
+                {% if fw.is_latest %}
+                <span class="badge bg-success">最新版</span>
+                {% endif %}
+            </h5>
+            <p class="text-muted small">
+                📅 {{ fw.created_at }} &nbsp;|&nbsp; 📦 {{ (fw.file_size / 1024) | round(1) }} KB
+            </p>
+            {% if fw.sha256 %}
+            <p class="text-muted small" style="word-break: break-all;">
+                SHA256: {{ fw.sha256[:16] }}...
+            </p>
+            {% endif %}
+            {% if fw.changelog %}
+            <pre class="changelog bg-light rounded p-2">{{ fw.changelog }}</pre>
+            {% endif %}
+
+            <div class="btn-group w-100 mt-2" role="group">
+                <form method="post" action="/api/firmware/{{ fw.id }}/set-latest" class="d-inline">
+                    {% if not fw.is_latest %}
+                    <button class="btn btn-sm btn-outline-success" title="设为最新版本">⭐ 标记最新</button>
+                    {% endif %}
+                </form>
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+                        data-bs-target="#pushModal{{ fw.id }}" title="向设备推送升级">📲 推送</button>
+                <form method="post" action="/api/firmware/delete/{{ fw.id }}"
+                      onsubmit="return confirm('确认删除 v{{ fw.version }} 吗？此操作不可恢复。')">
+                    <button class="btn btn-sm btn-outline-danger">🗑️ 删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推送弹窗 -->
+    <div class="modal fade" id="pushModal{{ fw.id }}" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form method="post" action="/api/firmware/{{ fw.id }}/push">
+                    <div class="modal-header"><h5>📲 推送固件 v{{ fw.version }}</h5></div>
+                    <div class="modal-body">
+                        <label class="form-label">目标设备 MAC ID</label>
+                        <input name="device_id" class="form-control" placeholder="例: aabbccddeeff" required>
+                        <div class="mt-2">
+                            <label class="form-label">操作类型</label>
+                            <select name="action" class="form-select">
+                                <option value="upgrade">升级 (upgrade)</option>
+                                <option value="downgrade">降级 (downgrade)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary w-100">发送命令</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+    <h4>📭 还没有固件版本</h4>
+    <p>点击右上角"上传新固件"按钮开始</p>
+</div>
+{% endif %}
+
+<!-- 上传弹窗 -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/api/firmware/upload" enctype="multipart/form-data" id="uploadForm">
+                <div class="modal-header">
+                    <h5>📤 上传新固件</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">固件文件 (.bin)</label>
+                        <input type="file" name="firmware" class="form-control" accept=".bin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">版本号</label>
+                        <input name="version" class="form-control" placeholder="例: 3.0.1" required
+                               pattern="\d+\.\d+\.\d+">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">更新日志</label>
+                        <textarea name="changelog" class="form-control" rows="3"
+                                  placeholder="例：修复了 Wi-Fi 断连问题，优化功耗"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="is_latest" value="1" class="form-check-input" id="setLatest" checked>
+                        <label class="form-check-label" for="setLatest">标记为最新版本</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary w-100">上传</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+// 上传表单 AJAX 提交（不刷新页面）
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = new FormData(this);
+    const resp = await fetch('/api/firmware/upload', { method: 'POST', body: form });
+    const data = await resp.json();
+    if (data.ok) {
+        alert('✅ 固件 v' + data.version + ' 上传成功！\nSHA256: ' + data.sha256);
+        location.reload();
+    } else {
+        alert('❌ 上传失败：' + (data.error || '未知错误'));
+    }
+});
+</script>
+{% endblock %}

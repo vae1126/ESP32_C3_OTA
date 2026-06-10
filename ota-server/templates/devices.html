@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}设备管理 — OTA 固件管理{% endblock %}
+{% block content %}
+
+<div class="my-4">
+    <h3>📱 设备管理</h3>
+    <p class="text-muted">设备首次连接 API 时自动注册</p>
+</div>
+
+{% if devices %}
+<div class="table-responsive">
+<table class="table table-striped table-hover bg-white rounded shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>设备 ID</th>
+            <th>设备名称</th>
+            <th>当前版本</th>
+            <th>状态</th>
+            <th>最后在线</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for d in devices %}
+        <tr>
+            <td><code>{{ d.device_id }}</code></td>
+            <td>{{ d.device_name or '-' }}</td>
+            <td><span class="version-badge">v{{ d.current_version }}</span></td>
+            <td>
+                {% if d.status == 'online' %}
+                <span class="badge bg-success">在线</span>
+                {% elif d.status == 'offline' %}
+                <span class="badge bg-secondary">离线</span>
+                {% elif d.status == 'upgrading' %}
+                <span class="badge bg-warning text-dark">升级中</span>
+                {% else %}
+                <span class="badge bg-info">{{ d.status }}</span>
+                {% endif %}
+            </td>
+            <td class="text-muted small">{{ d.last_seen or '-' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+    <h4>📭 暂无设备</h4>
+    <p>设备 OTA 检查时会自动注册到此列表</p>
+</div>
+{% endif %}
+
+{% if logs %}
+<h4 class="mt-5">📋 升级记录</h4>
+<div class="table-responsive">
+<table class="table table-sm table-bordered bg-white rounded shadow-sm">
+    <thead class="table-secondary">
+        <tr>
+            <th>设备</th>
+            <th>从版本</th>
+            <th>到版本</th>
+            <th>状态</th>
+            <th>开始时间</th>
+            <th>完成时间</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for l in logs %}
+        <tr>
+            <td><code>{{ l.device_id[:12] }}...</code></td>
+            <td>v{{ l.from_version }}</td>
+            <td>v{{ l.to_version }}</td>
+            <td>
+                {% if l.status == 'success' %}
+                <span class="badge bg-success">成功</span>
+                {% elif l.status == 'failed' %}
+                <span class="badge bg-danger">失败</span>
+                {% elif l.status == 'rollback' %}
+                <span class="badge bg-warning text-dark">已回滚</span>
+                {% else %}
+                <span class="badge bg-secondary">{{ l.status }}</span>
+                {% endif %}
+            </td>
+            <td class="small">{{ l.started_at or '-' }}</td>
+            <td class="small">{{ l.completed_at or '-' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,27 @@
+# ESP-IDF build output
+build/
+
+# Python
+ota-server/venv/
+ota-server/__pycache__/
+ota-server/*.pyc
+ota-server/uploads/*.bin
+ota-server/ota.db
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.clangd
+
+# Dependencies
+managed_components/
+dependencies.lock
+
+# Build config (environment-specific)
+sdkconfig
+sdkconfig.old

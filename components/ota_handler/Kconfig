@@ -1,0 +1,39 @@
+menu "OTA Upgrade Configuration"
+
+    config OTA_SERVER_URL
+        string "OTA Server Base URL"
+        default "http://47.121.26.212:5000"
+        help
+            The base URL of the OTA firmware management server.
+            Example: http://your-server.com or http://192.168.1.100:5000
+
+    config OTA_CHECK_INTERVAL_MIN
+        int "Auto check interval (minutes)"
+        default 120
+        range 10 1440
+        help
+            How often the device checks for new firmware.
+            Default: 120 minutes (2 hours).
+
+    config OTA_AUTO_UPGRADE
+        bool "Enable auto upgrade"
+        default y
+        help
+            If enabled, the device will automatically download and apply
+            firmware updates when a new version is detected.
+
+    config OTA_API_TOKEN
+        string "API Token for device authentication"
+        default "ota-api-token-2024"
+        help
+            The API token used to authenticate with the OTA server.
+            Must match the server's config.API_TOKEN.
+
+    config OTA_HTTP_TIMEOUT_MS
+        int "HTTP request timeout (ms)"
+        default 30000
+        range 5000 120000
+        help
+            Timeout for firmware download HTTP requests.
+
+endmenu
